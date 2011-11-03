@@ -35,9 +35,13 @@ class AMQP {
 			$instance = new AMQPExchange($this->_connection);
 		
 			$instance->declare($name, $config['type'], $config['flags']);
-
+			
 //			foreach ($config['bindings'] as $binding)
 //			{
+//				// Ensure queue is declared
+//				$this->queue($binding['queue']);
+//				
+//				// Bind queue to exchange
 //				$instance->bind($binding['queue'], $binding['routing_key']);
 //			}
 			
@@ -59,7 +63,7 @@ class AMQP {
 			
 			foreach ($config['bindings'] as $binding)
 			{
-				// Ensure change is declared
+				// Ensure exchange is declared
 				$this->exchange($binding['exchange']);
 				
 				// Bind queue to exchange
@@ -120,7 +124,7 @@ class AMQP {
 			// TODO: Make these configurable
 			$options = array(
 				'min' => 1,
-				'max' => 10,
+				'max' => 1,
 				'ack' => FALSE,
 			);
 		}

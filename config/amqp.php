@@ -10,56 +10,21 @@ return array (
 			'password' => 'guest',
 		),
 		'exchanges' => array(
-			'checkout' => array(
-				'type'  => AMQP_EX_TYPE_TOPIC,
-				'flags' => 0,
-				'bindings' => array(
-					
-				),
-			),
-			'publish' => array(
-				'type'  => AMQP_EX_TYPE_TOPIC,
-				'flags' => 0,
-				'bindings' => array(
-					
-				),
-			),
-			'checkin' => array(
-				'type'  => AMQP_EX_TYPE_TOPIC,
-				'flags' => 0,
-				'bindings' => array(
-					
-				),
-			),
+//			'my_exchange' => array(
+//				'type'  => AMQP_EX_TYPE_TOPIC,
+//				'flags' => AMQP_DURABLE,
+//			),
 		),
 		'queues' => array(
-			'checkout' => array(
-				'flags'    => AMQP_AUTODELETE,
-				'bindings' => array(
-					array(
-						'exchange'    => 'checkout',
-						'routing_key' => '',
-					),
-				),
-			),
-			'publish' => array(
-				'flags'    => AMQP_AUTODELETE,
-				'bindings' => array(
-					array(
-						'exchange'    => 'publish',
-						'routing_key' => '',
-					),
-				),
-			),
-			'checkin' => array(
-				'flags'    => AMQP_AUTODELETE,
-				'bindings' => array(
-					array(
-						'exchange'    => 'checkin',
-						'routing_key' => '',
-					),
-				),
-			),
+//			'my_queue' => array(
+//				'flags'    => AMQP_AUTODELETE,
+//				'bindings' => array(
+//					array(
+//						'exchange'    => 'my_exchange',
+//						'routing_key' => 'my_routing_key.*',
+//					),
+//				),
+//			),
 		),
 	),
 );

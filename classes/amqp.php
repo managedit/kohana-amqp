@@ -3,6 +3,7 @@
 class AMQP {
 	static $instances = array();
 	static $exchange_instances = array();
+	static $queue_instances = array();
 
 	protected $_config_group;
 	protected $_config;
@@ -29,16 +30,16 @@ class AMQP {
 	{
 		if ( ! isset(AMQP::$exchange_instances[$name]))
 		{
-			$config = $this->_config['exchanges'][$exchange];
+			$config = $this->_config['exchanges'][$name];
 			
 			$instance = new AMQPExchange($this->_connection);
 		
 			$instance->declare($name, $config['type'], $config['flags']);
 
-			foreach ($config['bindings'] as $binding)
-			{
-				$instance->bind($binding['queue'], $binding['routing_key']);
-			}
+//			foreach ($config['bindings'] as $binding)
+//			{
+//				$instance->bind($binding['queue'], $binding['routing_key']);
+//			}
 			
 			AMQP::$exchange_instances[$name] = $instance;
 		}
@@ -50,7 +51,7 @@ class AMQP {
 	{
 		if ( ! isset(AMQP::$queue_instances[$name]))
 		{
-			$config = $this->_config['queues'][$exchange];
+			$config = $this->_config['queues'][$name];
 			
 			$instance = new AMQPQueue($this->_connection);
 		
@@ -58,6 +59,10 @@ class AMQP {
 			
 			foreach ($config['bindings'] as $binding)
 			{
+				// Ensure change is declared
+				$this->exchange($binding['exchange']);
+				
+				// Bind queue to exchange
 				$instance->bind($binding['exchange'], $binding['routing_key']);
 			}
 		
@@ -85,23 +90,28 @@ class AMQP {
 		return $this->_connection->isConnected();
 	}
 	
-	public function reconnect()
+	public function reconnect($force = FALSE)
 	{
-		return $this->_connection->reconnect();
+		if ( ! $this->is_connected() OR $force)
+			return $this->_connection->reconnect();
+		
+		return TRUE;
 	}
 
-	public function publish($exchange, $routing_key, $message, $params = 0, $attributes = NULL)
+	public function publish($exchange, $routing_key, $message, $params = 0, $attributes = array())
 	{
-		Kohana::$log->add(Log::DEBUG, "AMQP: Publishing to :exchange", array(
+		Kohana::$log->add(Log::DEBUG, "AMQP: Publishing to ':exchange' exchange", array(
 			':exchange' => $exchange,
 		));
+		
+		$this->reconnect();
 		
 		return $this->exchange($exchange)->publish($message, $routing_key, $params, $attributes);
 	}
 
 	public function consume($queue, $options = NULL)
 	{
-		Kohana::$log->add(Log::DEBUG, "AMQP: Consuming (consume) from :queue", array(
+		Kohana::$log->add(Log::DEBUG, "AMQP: Consuming (consume) from ':queue' queue", array(
 			':queue' => $queue,
 		));
 		
@@ -111,9 +121,11 @@ class AMQP {
 			$options = array(
 				'min' => 1,
 				'max' => 10,
-				'ack' => 0,
+				'ack' => FALSE,
 			);
 		}
+		
+		$this->reconnect();
 		
 		return $this->queue($queue)->consume($options);
 	}
@@ -133,6 +145,18 @@ class AMQP {
 			);
 		}
 		
+		$this->reconnect();
+		
 		return $this->queue($queue)->consume($options);
+	}
+	
+	public function ack($queue, $message, $flags = NULL)
+	{
+		Kohana::$log->add(Log::DEBUG, "AMQP: Ack'ing message :delivery_tag for :queue", array(
+			':delivery_tag' => $message['delivery_tag'],
+			':queue'        => $queue,
+		));
+		
+		return $this->queue($queue)->ack($message['delivery_tag'], $flags);
 	}
 }

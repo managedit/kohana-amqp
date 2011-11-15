@@ -97,7 +97,12 @@ class AMQP {
 	public function reconnect($force = FALSE)
 	{
 		if ( ! $this->is_connected() OR $force)
+		{
+			Kohana::$log->add(Log::DEBUG, "AMQP: Reconnecting");
+
 			return $this->_connection->reconnect();
+		}
+			
 		
 		return TRUE;
 	}
@@ -124,7 +129,7 @@ class AMQP {
 			// TODO: Make these configurable
 			$options = array(
 				'min' => 1,
-				'max' => 1,
+				'max' => 2,
 				'ack' => FALSE,
 			);
 		}
@@ -134,24 +139,15 @@ class AMQP {
 		return $this->queue($queue)->consume($options);
 	}
 	
-	public function get($queue, $ack = AMQP_NOACK)
+	public function get($queue, $flags = NULL)
 	{
 		Kohana::$log->add(Log::DEBUG, "AMQP: Consuming (get) from :queue", array(
 			':queue' => $queue,
 		));
 		
-		if ($options === NULL)
-		{
-			$options = array(
-				'min' => 1,
-				'max' => 1,
-				'ack' => 0,
-			);
-		}
-		
 		$this->reconnect();
 		
-		return $this->queue($queue)->consume($options);
+		return $this->queue($queue)->get($flags);
 	}
 	
 	public function ack($queue, $message, $flags = NULL)

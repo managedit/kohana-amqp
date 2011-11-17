@@ -1,0 +1,4 @@
+application opt/mip-api
+media       opt/mip-api
+index.php   opt/mip-api
+minion      opt/mip-api

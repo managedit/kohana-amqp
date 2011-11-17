@@ -1,0 +1,11 @@
+Source: kohana3.2-amqp
+Section: php
+Priority: extra
+Maintainer: Kiall Mac Innes <kiall@managedit.ie>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+
+Package: kohana3.2-amqp
+Architecture: all
+Depends: ${misc:Depends}
+Description: Kohana AMQP Module
